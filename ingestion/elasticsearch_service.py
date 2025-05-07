@@ -55,6 +55,11 @@ def delete_story_index():
         logger.debug(f"Index '{STORIES_INDEX}' deleted")
 
 
+def find_story(doc_id):
+    story = es.get(index=STORIES_INDEX, id=doc_id)
+    return story
+
+
 def index_story(story):
     doc_id = get_doc_id(story)
     es.index(index=STORIES_INDEX, id=doc_id, document=story)
@@ -67,10 +72,11 @@ def bulk_index_stories(stories):
     actions = [
         {
             "_index": STORIES_INDEX,
-            "_id": get_doc_id(story),
+            "_id": doc_id,
             "_source": story,
         }
         for story in stories
+        if not find_story(doc_id := get_doc_id(story))
     ]
 
     try:
